@@ -1,5 +1,3 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/nyKu4E7_)
-[![Open in Visual Studio Code](https://classroom.github.com/assets/open-in-vscode-718a45dd9cf7e7f842a935f5ebbe5719a5e09af4491e668f4dbf3b35d5cca122.svg)](https://classroom.github.com/online_ide?assignment_repo_id=12518536&assignment_repo_type=AssignmentRepo)
 # Assignment 2: 3D Graphics and Interaction with WebGL
 
   - [Objective](#objective)
@@ -7,7 +5,7 @@
     - [Initialization & Basics](#1-initialization--basics)
     - [Plane Construction](#2-plane-construction)
     - [3D Letter Construction](#3-3d-letter-construction)
-    - [... (other sections as necessary)](#other-sections-as-necessary)
+    - [Illuminated Cube Construction)](#4-illuminated-cube-construction)
   - [Challenges & Learnings](#challenges--learnings)
   - [References & Resources](#references--resources)
   - [Feedback & Future Work](#feedback--future-work)
@@ -15,54 +13,47 @@
   - [Contribution & Collaboration](#contribution--collaboration)
 
 ## Objective
-Create an interactive 3D scene with WebGL that showcases a personalized letter standing on an XZ plane, combined with lighting techniques from a designated light source.
-
----
+Create an interactive 3D scene with WebGL that showcases a personalized letter (letter) standing on an XZ plane, combined with lighting techniques from a designated light source (cube).
+The letter and the cube should be able to take inputs from keyboard to move in the X and Z axes. In addition to that, we should allow the letter to do rotational and "jumping" movement. As for the cube, add a feature to activate/deactivate RGB light/color emitted by it.
 
 ## Approach & Steps
-Document the strategy and step-by-step approach you took to achieve the objectives of the assignment:
-
 ### 1. Initialization & Basics
-- Briefly describe how you initialized WebGL and any basic setup.
-- Mention any issues or challenges faced.
+- Start with the template code provided in the project repository. Which already includes the WebGL initialization.
+- Add the function resizer() to make the canvas responsive to browser's window size.
+- Differentiate the vertex shader and the fragment shader used by the cube and other than the cube those are the plane and the letter.
+- Make functions for repetiting tasks: creating shader program, binding buffer, updating view, etc.
 
 ### 2. Plane Construction
-- Detail your approach to creating the XZ plane, including choosing dimensions and positioning.
-- Include any challenges or deviations from the initial plan.
+- Initialize the matrices for the plane's position (vertices), color, faces (indices), and normals (orientation of surface).
+- Initially I made the letter to almost fill up the plane's surface. But in the next objective, we should be able to play with the letter's position along the plane. So I make it smaller.
 
 ### 3. 3D Letter Construction
-- Explain how you designed the 3D letter, from design considerations to the actual coding.
-- Highlight any special techniques or challenges.
+- The third letter in my nickname is 'S'. Because the letter's line is cursive and not straight, I decided to just make it if it is made with straight lines as it is easier for me to estimate the position of the vertices. That's why my 'S' is square.
+- Some of the challenges in the 3d letter construction are: when the X Z axis is different from what you wanted it to be (ex: X axis means the side of the monitor, Z axis is the how close/far the object is from the viewer), repeating the pattern in the face matrix (indices) with different numbers.
 
-(Continue listing other sections and tasks as appropriate...)
-
----
+### 4. Illuminated Cube Construction
+- I basically take the code from previous lessons for the cube.
+- The difference is we can change the cube's colors with keyboard.
+- Also, with it being the light source, that is the biggest challenge I face when doing this assignment. Because until the first time I write the README, I still don't know what could solve it.
 
 ## Challenges & Learnings
-Describe any significant challenges faced during the project and how you overcame them. Also, document any new things you learned during the process.
-
----
+The biggest challenge for this assignment is the lighting. I still cannot fully understand the components used to make an object appears illuminated. Because it is not as easy as copy-pasting the code from previous lessons. It is not as easy as _stealing_ someone's code in the forum or tell ChatGPT to make you illuminated cube. The lighting problems I faced are:
+1. The illuminated cube does not appear illuminated.
+2. It still cannot function as a light source.
+3. Other people's code cannot always fit perfectly in your code (I use the code from previous lessons, my cube is not yet a light source. My friend tweak it a little, it kind of working. But when I follow his path, my letter does not even appear).
 
 ## References & Resources
 List all the external resources, references, tutorials, or documentation you've consulted during the assignment:
-- [WebGL Fundamentals](https://webglfundamentals.org/)
-- [StackOverflow Post on Matrix Transformations](https://stackoverflow.com/questions/example)
-- Any interactions or questions you raised with ChatGPT.
-
----
+- [Getting uniform location problem](https://stackoverflow.com/questions/14413713/webgl-invalid-operation-uniform1i-location-not-for-current-program)
 
 ## Feedback & Future Work
-Discuss any feedback you have about the assignment itself (was it too easy, too hard, just right) and what you might want to add or explore in the future.
-
----
+For me, this lighting topic is hard to make it work for the problems/reasons I have stated above.
 
 ## Screenshots, Screencast & GIFs
-Include some visual representation of your work. These can be static images, YouTube videos, or GIFs that demonstrate the functionality and features you implemented. 
-
-(Note: To embed images or GIFs in Markdown, use: `![Description](URL_TO_IMAGE)`)
-
----
+![screenshot image](skrinsyot.png)
+![letter gif](letter.gif)
+![cube gif](cube.gif)
 
 ## Contribution & Collaboration
-If you collaborated with someone or if someone helped you, mention them here, and explain how they contributed or what you learned from them.
-
+- Big thanks to Apta for assissting me with the keyboard input problem and many things related to inputs and Dimas.
+- Both gave me a headstart hoping to discuss the problem with the lighting together...
