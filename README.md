@@ -50,8 +50,12 @@ List all the external resources, references, tutorials, or documentation you've 
 For me, this lighting topic is hard to make it work for the problems/reasons I have stated above.
 
 ## Screenshots, Screencast & GIFs
-![screenshot image](skrinsyot.png)
-![letter gif](letter.gif)
+![screenshot image](skrinsyot.png)<br />
+
+### Letter Movement
+![letter gif](letter.gif)<br />
+
+### Cube Movement & Color Changing and Camera Movement
 ![cube gif](cube.gif)
 
 ## Contribution & Collaboration
