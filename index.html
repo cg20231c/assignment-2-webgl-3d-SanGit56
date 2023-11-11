@@ -121,8 +121,7 @@
         `;
 
         // Utility functions
-        function createShaderProgram(gl, vertexShaderSource, fragmentShaderSource)
-        {
+        function createShaderProgram(gl, vertexShaderSource, fragmentShaderSource) {
             // Compile and link shaders
             const vertexShader = gl.createShader(gl.VERTEX_SHADER);
             gl.shaderSource(vertexShader, vertexShaderSource);
@@ -144,10 +143,10 @@
 
         // Define plane vertices
         const planeVertices = new Float32Array([
-            -1.4, -0.001, -1.4,
-            1.4, -0.001, -1.4,
-            1.4, -0.001, 1.4,
-            -1.4, -0.001, 1.4,
+            -1.8, 0.0, -1.8,
+            1.8, 0.0, -1.8,
+            1.8, 0.0, 1.8,
+            -1.8, 0.0, 1.8,
         ]);
 
         // Define plane colors
@@ -649,31 +648,31 @@
             0.1, 0.0, 0.1,
             -0.1, 0.2, 0.1,
             0.1, 0.2, 0.1,
-            
+
             // Back face
             -0.1, 0.0, -0.1,
             0.1, 0.0, -0.1,
             -0.1, 0.2, -0.1,
             0.1, 0.2, -0.1,
-            
+
             // Left face
             -0.1, 0.0, -0.1,
             -0.1, 0.0, 0.1,
             -0.1, 0.2, -0.1,
             -0.1, 0.2, 0.1,
-            
+
             // Right face
             0.1, 0.0, 0.1,
             0.1, 0.0, -0.1,
             0.1, 0.2, 0.1,
             0.1, 0.2, -0.1,
-            
+
             // Top face
             -0.1, 0.2, 0.1,
             0.1, 0.2, 0.1,
             -0.1, 0.2, -0.1,
             0.1, 0.2, -0.1,
-            
+
             // Bottom face
             -0.1, 0.0, 0.1,
             0.1, 0.0, 0.1,
@@ -757,17 +756,82 @@
         const zFar = 100.0;
         mat4.perspective(projectionMatrix, fieldOfView, aspect, zNear, zFar);
 
+        // Spherical camera parameters
+        let azimuth = 3;     // Horizontal angle (yaw)
+        let elevation = 5;   // Vertical angle (pitch)
+        let radius = 6.0;   // Distance from the target
+
+        // Mouse interaction variables
+        let isDragging = false;
+        let lastX, lastY;
+
         // Set camera position and view
         // Set up the view matrix (camera position and orientation)
         const viewMatrix = mat4.create();
-        const cameraPosition = vec3.fromValues(4.0, 1.2, 0.0); // Adjust the camera position
+        const cameraPosition = vec3.fromValues(5.0, 1.2, 0.0); // Adjust the camera position
         const targetPosition = vec3.fromValues(0.0, 0.2, 0.0); // Point the camera at the origin
         const upVector = vec3.fromValues(0.0, 1.0, 0.0); // Define the up vector
         mat4.lookAt(viewMatrix, cameraPosition, targetPosition, upVector);
 
+        function updateViewMatrix() {
+            const cameraPosition = vec3.fromValues(
+                radius * Math.sin(elevation) * Math.cos(azimuth),
+                radius * Math.cos(elevation),
+                radius * Math.sin(elevation) * Math.sin(azimuth)
+            );
+
+            mat4.lookAt(viewMatrix, cameraPosition, targetPosition, upVector);
+        }
+
+        updateViewMatrix();
+
+        canvas.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+
+            const deltaX = e.clientX - lastX;
+            const deltaY = e.clientY - lastY;
+
+            azimuth += deltaX * 0.01;
+            elevation += deltaY * 0.01;
+
+            // Clamp the elevation to avoid flipping the camera
+            elevation = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, elevation));
+
+            updateViewMatrix();
+            lastX = e.clientX;
+            lastY = e.clientY;
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
         // Combine the view matrix with the projection matrix
         const viewProjectionMatrix = mat4.create();
         mat4.multiply(viewProjectionMatrix, projectionMatrix, viewMatrix);
+
+        let R = 1.0;
+        let G = 1.0;
+        let B = 1.0;
+
+        // Function to update cubeColors array with new color values
+        function updateCubeColors() {
+            for (let i = 0; i < cubeColors.length; i += 4) {
+                cubeColors[i] = R;
+                cubeColors[i + 1] = G;
+                cubeColors[i + 2] = B;
+            }
+
+            const cubeColorBuffer = createBindBuffer(gl, cubeColors, gl.ARRAY_BUFFER);
+            gl.bindBuffer(gl.ARRAY_BUFFER, cubeColorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, cubeColors, gl.STATIC_DRAW);
+        }
 
         // Variables for animation
         const translationSpeed = 0.1;
@@ -815,6 +879,42 @@
                         isJumping = true;
                     }
                     break;
+                case 'ArrowUp':
+                    d_l[0] -= translationSpeed; // Move forward
+                    break;
+                case 'ArrowDown':
+                    d_l[0] += translationSpeed; // Move forward
+                    break;
+                case 'ArrowLeft':
+                    d_l[2] += translationSpeed; // Move forward
+                    break;
+                case 'ArrowRight':
+                    d_l[2] -= translationSpeed; // Move forward
+                    break;
+                case 'r':
+                    if (R == 0.0) {
+                        R = 1.0;
+                    } else {
+                        R = 0.0;
+                    }
+                    updateCubeColors();
+                    break;
+                case 'g':
+                    if (G == 0.0) {
+                        G = 1.0;
+                    } else {
+                        G = 0.0;
+                    }
+                    updateCubeColors();
+                    break;
+                case 'b':
+                    if (B == 0.0) {
+                        B = 1.0;
+                    } else {
+                        B = 0.0;
+                    }
+                    updateCubeColors();
+                    break;
             }
         });
 
@@ -824,6 +924,7 @@
             const planePositionBuffer = createBindBuffer(gl, planeVertices, gl.ARRAY_BUFFER);
             const planeColorBuffer = createBindBuffer(gl, planeColors, gl.ARRAY_BUFFER);
             const planeIndexBuffer = createBindBuffer(gl, planeIndices, gl.ELEMENT_ARRAY_BUFFER);
+            const planeNormalBuffer = createBindBuffer(gl, planeNormals, gl.ARRAY_BUFFER);
 
             // Set up attribute pointers
             gl.bindBuffer(gl.ARRAY_BUFFER, planePositionBuffer);
@@ -833,6 +934,10 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, planeColorBuffer);
             gl.enableVertexAttribArray(colorAttributeLocation);
             gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, planeNormalBuffer);
+            gl.enableVertexAttribArray(normalAttributeLocation);
+            gl.vertexAttribPointer(normalAttributeLocation, 3, gl.FLOAT, false, 0, 0);
 
             mat4.multiply(modelViewProjectionMatrix, viewProjectionMatrix, planeModelMatrix);
             gl.uniformMatrix4fv(modelViewProjectionMatrixLocation, false, modelViewProjectionMatrix);
@@ -846,10 +951,10 @@
         function drawLetter() {
             if (isJumping) {
                 d_o[1] += jumpVelocity; // Update vertical position
-                
+
                 // Apply gravity
                 jumpVelocity -= gravity;
-                
+
                 // Check if the player has landed
                 if (d_o[1] <= 0.0) {
                     // d_o[1] = 0.0;
@@ -860,27 +965,32 @@
             const letterPositionBuffer = createBindBuffer(gl, letterVertices, gl.ARRAY_BUFFER);
             const letterColorBuffer = createBindBuffer(gl, letterColors, gl.ARRAY_BUFFER);
             const letterIndexBuffer = createBindBuffer(gl, letterIndices, gl.ELEMENT_ARRAY_BUFFER);
+            const letterNormalBuffer = createBindBuffer(gl, letterNormals, gl.ARRAY_BUFFER);
 
             // Bind the letter's position buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, letterPositionBuffer);
             gl.enableVertexAttribArray(positionAttributeLocation);
             gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false, 0, 0);
-            
+
             // Bind the letter's color buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, letterColorBuffer);
             gl.enableVertexAttribArray(colorAttributeLocation);
             gl.vertexAttribPointer(colorAttributeLocation, 4, gl.FLOAT, false, 0, 0);
-            
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, letterNormalBuffer);
+            gl.enableVertexAttribArray(normalAttributeLocation);
+            gl.vertexAttribPointer(normalAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+
             // Bind the letter's index buffer
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, letterIndexBuffer);
 
-            mat4.rotateY(letterModelMatrix, mat4.create(),  angle);
-            mat4.translate(letterModelMatrix, letterModelMatrix,  [d_o[0], d_o[1], d_o[2]]);
+            mat4.rotateY(letterModelMatrix, mat4.create(), angle);
+            mat4.translate(letterModelMatrix, letterModelMatrix, [d_o[0], d_o[1], d_o[2]]);
             mat4.multiply(modelViewProjectionMatrix, viewProjectionMatrix, letterModelMatrix);
-            
+
             // Pass the modelViewProjectionMatrix to your shaders as a uniform
             gl.uniformMatrix4fv(modelViewProjectionMatrixLocation, false, modelViewProjectionMatrix);
-            
+
             // Set the model matrix for the 3D letter
             gl.uniformMatrix4fv(modelMatrixLocation, false, modelViewProjectionMatrix);
 
@@ -889,11 +999,11 @@
         }
 
         // Illuminated cube
-        function drawIlluminatedCube() {
+        function drawCube() {
             const cubePositionBuffer = createBindBuffer(gl, cubeVertices, gl.ARRAY_BUFFER);
             const cubeColorBuffer = createBindBuffer(gl, cubeColors, gl.ARRAY_BUFFER);
             const cubeIndexBuffer = createBindBuffer(gl, cubeIndices, gl.ELEMENT_ARRAY_BUFFER);
-            
+
             // Set up attribute pointers
             gl.bindBuffer(gl.ARRAY_BUFFER, cubePositionBuffer);
             gl.enableVertexAttribArray(positionAttributeLocation2);
@@ -904,18 +1014,18 @@
             gl.vertexAttribPointer(colorAttributeLocation2, 4, gl.FLOAT, false, 0, 0);
 
             gl.useProgram(letterProgram); // Use the object shader program
-            
+
             // Set the point light color (as an RGB value)
-            const pointLightColor = [1.0, 1.0, 1.0]; // Adjust the color as needed
+            const pointLightColor = [R, G, B]; // Adjust the color as needed
             gl.uniform3fv(pointLightColorLocation, pointLightColor);
-            
+
             pointLightPosition[0] = d_l[0];
             pointLightPosition[2] = d_l[2];
-            
+
             gl.uniform3fv(pointLightPositionLocation, pointLightPosition);
 
             gl.useProgram(cubeProgram); // Use the cube shader program
-            mat4.translate(cubeModelMatrix,  mat4.create(), [d_l[0], 1.0, d_l[2]]);
+            mat4.translate(cubeModelMatrix, mat4.create(), [d_l[0], 1.0, d_l[2]]);
             mat4.multiply(modelViewProjectionMatrix, viewProjectionMatrix, cubeModelMatrix);
             gl.uniformMatrix4fv(modelViewProjectionMatrixLocation2, false, modelViewProjectionMatrix);
 
@@ -925,7 +1035,7 @@
         }
 
         // Lighting
-        const ambientColor = vec3.fromValues(0.2, 0.2, 0.2);  // [0.2, 0.2, 0.2];
+        const ambientColor = vec3.fromValues(0.2, 0.2, 0.2);
         // Get the uniform locations for directional light direction and color
         const ambientColorLocation = gl.getUniformLocation(letterProgram, "uAmbientColor");
         // Varibles for lighting and shading
@@ -949,11 +1059,11 @@
         gl.uniform3fv(directionalLightColorLocation, directionalLightColor);
 
         // Set the point light position
-        const pointLightPosition = [1.0, 2.0, 3.0]; // Adjust the position as needed
+        const pointLightPosition = [0.0, 0.0, 0.0]; // Adjust the position as needed
         gl.uniform3fv(pointLightPositionLocation, pointLightPosition);
 
         // Set the point light color (as an RGB value)
-        const pointLightColor = [1.0, 1.0, 1.0]; // Adjust the color as needed
+        const pointLightColor = [R, G, B]; // Adjust the color as needed
         gl.uniform3fv(pointLightColorLocation, pointLightColor);
 
         // Set the point light intensity (adjust as needed)
@@ -987,7 +1097,7 @@
             gl.useProgram(cubeProgram);
 
             // Draw the illuminated cube
-            drawIlluminatedCube();
+            drawCube();
 
             // Loop for animations
             requestAnimationFrame(drawScene);
